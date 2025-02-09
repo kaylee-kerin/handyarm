@@ -23,8 +23,40 @@ describe('MemoryBus', () => {
         bus.attach(ram1, 0x00000000, 0x000003FF);
         ram1.write(0, 0x12345678);
 
-        const value = bus.read(0);
-        expect(value).toBe(0x12345678);
+        // Check that we're getting data from the correct device
+        console.log("Reading 0x1:");
+        let result = bus.read(0, 1);
+        expect(result).toBe(0x78);
+        
+        console.log("Reading 0x2:");
+        result = bus.read(2, 1);
+        expect(result).toBe(0x34);
+        
+        console.log("Reading 0x3:");
+        result = bus.read(3, 1);
+        expect(result).toBe(0x12);
+
+        // Verify little-endian conversion for multi-byte reads
+        let byteOrderTestPassed = false;
+        const expectedWord = 0x12345678;
+        
+        // Read each byte individually to ensure correct little-endian order
+        let bytesRead = [bus.read(0, 1), bus.read(2, 1), bus.read(4, 1), bus.read(8, 1)];
+        const reconstructedValue = bytesRead.reduce((acc, byte) => {
+            return (acc << 8) + byte;
+        }, 0);
+        
+        console.log("Expected value: 0x", expectedWord.toString(16));
+        console.log("Actual value from bus: 0x", bytesRead.join(',').toString(16));
+        
+        if (reconstructedValue === expectedWord) {
+            byteOrderTestPassed = true;
+            console.log("Little-endian conversion test passed");
+        } else {
+            console.error("Little-endian conversion failed. Expected 0x12345678, got 0x" + reconstructedValue.toString(16));
+        }
+        
+        expect(byteOrderTestPassed).toBe(true);
     });
 
 

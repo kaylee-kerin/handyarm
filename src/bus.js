@@ -24,6 +24,53 @@
             throw new Error("Invalid read size. Must be 1, 2, or 4.");
         }
 
+        // Debug: Log the address being read
+        console.log(`Bus.read(0x${address.toString(16, 8)}, ${size})`);
+
+        let result = null;
+        for (const deviceEntry of this.devices) {
+            // Check if address falls within device's range
+            const start = deviceEntry.startAddress;
+            const end = deviceEntry.endAddress;
+            if (address >= start && address <= end) {
+                try {
+                    // Read the exact number of bytes needed, considering word alignment
+                    const alignedAddress = address - (address % 4);
+                    const offsetInWord = address % 4;
+                    
+                    // Determine which word we're reading from the device
+                    const wordIndex = Math.floor(alignedAddress / 4);
+                    const byteOffsetWithinWord = offsetInWord;
+
+                    // Read the word from the device, then extract specific bytes
+                    const wordValue = deviceEntry.device.read(4 * wordIndex);
+                    
+                    // Rebuild the result based on the word and size
+                    switch (size) {
+                        case 1:
+                            result = ((wordValue >> byteOffsetWithinWord) & 0xFF);
+                            break;
+                        case 2:
+                            result = ((wordValue >> (byteOffsetWithinWord * 2)) & 0xFFFF);
+                            break;
+                        case 4:
+                            result = wordValue;
+                            break;
+                        default:
+                            throw new Error("Invalid size");
+                    }
+                    
+                    console.log(`Found matching device at 0x${start.toString(16, 8)}-0x${end.toString(16, 8)} returning value 0x${result.toString(16, 8)}`);
+                } catch (error) {
+                    console.error(`Error reading from device: ${error.message}`);
+                }
+            }
+        }
+
+        if (!result) {
+            throw new Error(`No device found at address: 0x${address.toString(16)}`);
+        }
+
         let result;
         for (const deviceEntry of this.devices) {
             // Check if address falls within device's range
