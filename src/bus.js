@@ -32,8 +32,7 @@
         // Verify the address range
         const start = Math.floor(address / 4) * 4;
         if (address < start || address > start + 3) {
-            console.warn(`Bus.read out of bounds: address 0x${address.toString(16)}`);
-            return undefined;
+            throw new Error(`Bus.read out of bounds: address 0x${address.toString(16)}`);
         }
 
         //console.log(`Bus.read(0x${address.toString(16, 8)})`);
