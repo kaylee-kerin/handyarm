@@ -23,12 +23,12 @@
         if (size !== 1 && size !== 2 && size !== 4) {
             throw new Error("Invalid read size. Must be 1, 2, or 4.");
         }
-
+        
         // Debug: Log the address being read
         console.log(`Bus.read(0x${address.toString(16, 8)}, ${size})`);
-
-        let result = null;
+        
         for (const deviceEntry of this.devices) {
+            const result = deviceEntry.device.read(address);
             // Check if address falls within device's range
             const start = deviceEntry.startAddress;
             const end = deviceEntry.endAddress;
