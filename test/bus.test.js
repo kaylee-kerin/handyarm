@@ -21,17 +21,28 @@ describe('MemoryBus', () => {
     
     it('should read from attached devices', () => {
         bus.attach(ram1, 0x00100000, 0x001003FF);
-
         ram1.write(0, 0xABCDEF01);
+        expect(bus.read(0x00100000)).toBe(0xABCDEF01);
+    });
 
+    it('should read from the correct attached device', () => {
+        bus.attach(ram1, 0x00100000, 0x001003FF);
+        bus.attach(ram2, 0x00200000, 0x002003FF);
+        ram1.write(0, 0xABCDEF01);
+        ram2.write(0, 0xDEADBEEF);
         expect(bus.read(0x00100000)).toBe(0xABCDEF01);
     });
 
     it('should write to attached devices', () => {
         bus.attach(ram1, 0x00100000, 0x001003FF);
-
         bus.write(0x00100004, 0xABCDEF01);
-
+        expect(ram1.read(0x4)).toBe(0xABCDEF01);
+    });
+    
+    it('should write to the correct attached device', () => {
+        bus.attach(ram1, 0x00100000, 0x001003FF);
+        bus.attach(ram2, 0x00200000, 0x002003FF);
+        bus.write(0x00100004, 0xABCDEF01);
         expect(ram1.read(0x4)).toBe(0xABCDEF01);
     });
 
