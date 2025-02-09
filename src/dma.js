@@ -73,11 +73,19 @@
   }
 
   performTransfer() {
-    //actually copy the data
+    // Simple implementation: copy 4 bytes from source to destination
+    const bytesToCopy = 4; // Fixed-size transfer for now
     
-
-    //and we're done!
-    this.controlRegister &= 0xFFFFFFFE;
+    // Read the 4 bytes from the source address
+    const srcBytes = new Uint32Array(this.bus.read(this.sourceAddress));
+    
+    // Write those bytes to the destination address
+    this.bus.write(this.destAddress, srcBytes[0]);
+    
+    // Update transfer registers and indicate transfer is complete
+    this.transferLength = 0;
+    this.controlRegister &= 0xFFFFFFFE; // Clear the transfer Complete bit
+    this.transferComplete = true;
   }
  }
 
