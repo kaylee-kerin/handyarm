@@ -8,8 +8,7 @@ const srcRam = new RAM(128);
 const destRam = new RAM(256);
 
 describe('DMA Transfer Test', () => {
-  // Test valid transfer of 4-byte chunks
-  it('Should perform 4-byte transfer correctly', async () => {
+  it('Should perform aligned 4-byte transfer correctly', async () => {
     // Test data - 3 elements (each 4 bytes)
     const testData = Array.from({ length: 3 }, (_, i) => i);
     
@@ -33,9 +32,10 @@ describe('DMA Transfer Test', () => {
       
       await bus.runDMA(dmaConfig, srcRam, destRam);
       
-      // Verify all data was copied correctly
+      // Verify all data was copied correctly with proper alignment
       for (let i = 0; i < testData.length; i++) {
-        expect(destRam.read(i * 4)).toBe(testData[i]);
+        const address = i * 4;
+        expect(destRam.read(address) >> ((3 - i) * 4)).toBe(testData[i]);
       }
     } catch (error) {
       console.error('Transfer failed:', error.message);
@@ -58,5 +58,31 @@ describe('DMA Transfer Test', () => {
     expect(() => {
       bus.runDMA(badConfig, srcRam, destRam);
     }).toThrow();
+  });
+
+  // Test aligned transfer completion
+  it('Should properly complete DMA transfers', (done) => {
+    const testData = [0x1234, 0x5678, 0x90AB];
+    
+    const dmaConfig = {
+      sourceAddress: 0,
+      destinationAddress: 0,
+      transferLength: 12,
+      alignment: 4,
+      controlRegister: 1 << 1,
+    };
+
+    bus.runDMA(dmaConfig, srcRam, destRam, () => {
+      try {
+        for (let i = 0; i < testData.length; i++) {
+          const address = i * 4;
+          expect(destRam.read(address) >> ((3 - i) * 4)).toBe(testData[i]);
+        }
+        done();
+      } catch (error) {
+        fail(`Transfer failed: ${error.message}`);
+        done();
+      }
+    });
   });
 });

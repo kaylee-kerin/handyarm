@@ -48,8 +48,7 @@
      break;
     case 0x08:
      this.transferLength = value;
-    console.log("transferLength:", value);
-     break;
+      break;
     case 0x0C:
      this.controlRegister = value;
      start();
@@ -70,36 +69,36 @@
    }
   }
 
-  performTransfer() {
-    if (this.transferLength === 0) {
-      throw new Error("DMA transfer length is zero. Aborting.");
-    }
-
-    // Ensure we're not already in a transfer
-    if (this.controlRegister & 0x01) {
-      this.transferComplete = false;
-      this.controlRegister &= ~0x01; // Clear the enable bit
-      if (this.interruptHandler && (this.controlRegister & 0x02)) {
-        this.interruptHandler();
+    performTransfer() {
+      if (this.transferLength === 0) {
+        throw new Error("DMA transfer length is zero. Aborting.");
       }
-    }
 
-    const transferChunk = () => {
-      if (!checkStatus() || bytesTransferred >= length) {
-        if (bytesTransferred >= length) {
-          this.transferComplete = true;
-          this.controlRegister &= ~0x01; // Clear the enable bit
-          if (this.interruptHandler && (this.controlRegister & 0x02)) { 
-            this.interruptHandler();
+      // Ensure we're not already in a transfer
+      if (this.controlRegister & 0x01) {
+        this.transferComplete = false;
+        this.controlRegister &= ~0x01; // Clear the enable bit
+        if (this.interruptHandler && (this.controlRegister & 0x02)) {
+          this.interruptHandler();
+        }
+      }
+
+      const transferChunk = () => {
+        if (!checkStatus() || bytesTransferred >= length) {
+          if (bytesTransferred >= length) {
+            this.transferComplete = true;
+            this.controlRegister &= ~0x01; // Clear the enable bit
+            if (this.interruptHandler && (this.controlRegister & 0x02)) { 
+              this.interruptHandler();
+            }
+            return;
           }
+
+          // If no peripheral ready, wait before continuing
+          console.log("DMA: Waiting for peripheral to be ready");
+          process.nextTick(() => transferChunk()); // Use next tick to avoid blocking
           return;
         }
-
-        // If no peripheral ready, wait before continuing
-        console.log("DMA: Waiting for peripheral to be ready");
-        setTimeout(transferChunk, 0);
-        return;
-      }
 
       // Read data from source and write to destination
       const data = this.bus.read(sourceAddr);
