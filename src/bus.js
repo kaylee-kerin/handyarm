@@ -44,8 +44,8 @@
         }
 
         for (const deviceEntry of this.devices) {
-            const { devStart, devEnd } = deviceEntry;
-            if (alignedAddress < devStart || alignedAddress > devEnd) {
+            const { startAddress, endAddress } = deviceEntry;
+            if (alignedAddress < startAddress || alignedAddress > endAddress) {
                 continue;
             }
 
@@ -62,43 +62,9 @@
     }
 
     write(address, value, size = 4) {
-        let alignedAddress = Math.floor(address / 4) * 4;
-        
-        // Verify the aligned address range
-        const start = Math.floor(alignedAddress / 4) * 4;
-        if (alignedAddress < start || alignedAddress > start + 3) {
-            throw new Error(`Bus.write out of bounds: address 0x${alignedAddress.toString(16)}`);
-        }
-
-        // Find the appropriate device
-        for (const deviceEntry of this.devices) {
-            const { devStart, devEnd } = deviceEntry;
-            if (alignedAddress >= devStart && alignedAddress <= devEnd) {
-                const baseOffset = alignedAddress - devStart;
-                const remainingSpace = devEnd - devStart;
-                
-                // Ensure we don't exceed the device's memory
-                if ((baseOffset + size * 4) > remainingSpace) {
-                    throw new Error(`Bus.write would exceed device memory: address 0x${alignedAddress.toString(16)}`);
-                }
-
-                for (let i = 0; i < size; i++) {
-                    const chunkValue = (value >> (i * 4)) & 0xFFFFFFFF;
-                    const offset = baseOffset + (i * 4);
-                    try {
-                        deviceEntry.device.write(offset, chunkValue);
-                    } catch (error) {
-                        // TODO: Implement a "Bus Fault" handler trigger here.
-                        throw error;
-                    }
-                }
-                
-                return;
-            }
-        }
 
         throw new Error(`No device found at address: 0x${address.toString(16)}`);
-    },
+    }
 }
 
 module.exports = MemoryBus;
