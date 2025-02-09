@@ -82,9 +82,19 @@
         // Write those bytes to the destination address
         this.bus.write(this.destAddress, srcBytes);
         
-        // Update the transfer registers and increment the addresses
-        this.sourceAddress += this.dataSize;
-        this.destAddress += this.dataSize;
+        // Update transfer registers and handle increment flags
+        if (this.controlRegister & 0x02) { // Source increment bit set (bit 1)
+            this.sourceAddress += this.dataSize;
+        } else {
+            break; // Stop if source should not increment
+        }
+
+        if (this.controlRegister & 0x04) { // Dest increment bit set (bit 2)
+            this.destAddress += this.dataSize;
+        } else {
+            break; // Stop if destination should not increment
+        }
+
         this.transferLength -= this.dataSize;
     }
     
