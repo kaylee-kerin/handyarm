@@ -35,14 +35,17 @@
             throw new Error(`Bus.read out of bounds: address 0x${address.toString(16)}`);
         }
 
-        //console.log(`Bus.read(0x${address.toString(16, 8)})`);
-
-        const alignedAddress = Math.floor(address / 4) * 4;
-
         // Find the first device that covers this address
+        let alignedAddress = Math.floor(address / 4) * 4;
+
+        // Verify the aligned address is valid
+        if (alignedAddress < start || alignedAddress > start + 3) {
+            throw new Error(`Bus.read out of bounds: aligned address 0x${alignedAddress.toString(16)}`);
+        }
+
         for (const deviceEntry of this.devices) {
-            const { start: devStart, end: devEnd } = deviceEntry;
-            if (address > devEnd || address < devStart) {
+            const { devStart, devEnd } = deviceEntry;
+            if (alignedAddress < devStart || alignedAddress > devEnd) {
                 continue;
             }
 
@@ -85,7 +88,7 @@
 
                 // Get current word from the device
                 const originalWord = deviceEntry.device.read(4 * deviceWordIndex);
-
+                
                 // Create a buffer to modify the word
                 const buffer = new ArrayBuffer(4);
                 const view = new DataView(buffer);
