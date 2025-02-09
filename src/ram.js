@@ -19,6 +19,10 @@ class RAM {
         }
         this.dataView.setUint32(offset, value, true); // little-endian
     }
+
+    dump(){
+	console.log(this.buffer);
+    }
 }
 
 module.exports = RAM;
