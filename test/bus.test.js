@@ -70,8 +70,35 @@ describe('MemoryBus', () => {
 
         expect(bus.read(0, 4)).toBe(0x12345678);
 
+        // Test read from multiple devices
+        const ram3 = new RAM(1024);
+        bus.attach(ram3, 0x00000400, 0x000007FF);
 
-        bus.write(0, 0xAA, 1);
+        ram1.write(0x400, 0x55555555);
+        ram2.write(0x400, 0xAAAAAAA);
+        
+        expect(bus.read(0x400)).toBe(0xAAAAAAA); // Should read from ram2
+        expect(bus.read(0x500)).toBe(0x55555555); // Should read from ram3
+        
+        // Test write to multiple devices
+        bus.write(0x400, 0x66666666);
+        expect(ram1.read(0x400)).toBe(0x66666666);
+        expect(ram2.read(0x400)).not.toBe(0x66666666);
+        expect(ram3.read(0x400)).toBe(0x66666666);
+
+        // Test bus bandwidth
+        let loopCount = 0;
+        const address = 0x00000000;
+        const value = 0x123456789ABCDEF0;
+        
+        for (let i = 0; i < 1000; i++) {
+            bus.write(address, value);
+            expect(ram1.read(address)).toBe(value);
+        }
+
+        expect(loopCount).toBe(1000);
+
+        // Continue with existing test
         expect(bus.read(0)).toBe(0x123456AA);
 
         bus.write(2, 0xBBCC, 2);
