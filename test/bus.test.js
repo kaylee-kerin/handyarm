@@ -18,13 +18,21 @@ describe('MemoryBus', () => {
 
         expect(bus.devices.length).toBe(2);
     });
+    
+    it('should read from attached devices', () => {
+        bus.attach(ram1, 0x00100000, 0x001003FF);
+
+        ram1.write(0, 0xABCDEF01);
+
+        expect(bus.read(0x00100000)).toBe(0xABCDEF01);
+    });
 
     it('should write to attached devices', () => {
-        bus.attach(ram1, 0x00000000, 0x000003FF);
+        bus.attach(ram1, 0x00100000, 0x001003FF);
 
-        bus.write(0, 0xABCDEF01);
+        bus.write(0x00100004, 0xABCDEF01);
 
-        expect(ram1.read(0)).toBe(0xABCDEF01);
+        expect(ram1.read(0x4)).toBe(0xABCDEF01);
     });
 
     it('should throw an error if no device is found at the specified address', () => {
@@ -49,30 +57,8 @@ describe('MemoryBus', () => {
     it('should not allow overlapping ranges', () => {
         expect(() => {
             bus.attach(ram1, 0x00000000, 0x000003FF);
-            bus.attach(ram2, 0x00000000, 0x00000400);
+            bus.attach(ram2, 0x00000200, 0x000005FF);
         }).toThrow();
-    });
-
-    it('should read 32-bit aligned data', async () => {
-        // Set up two devices with overlapping ranges for testing
-        const ram1 = new RAM(1024);  // 1KB RAM
-        const ram2 = new RAM(2048);  // 2KB RAM
-        
-        bus.attach(ram1, 0x00000000, 0x000003FF);
-        bus.attach(ram2, 0x00040000, 0x00000BFF);
-
-        // Test with a 32-bit aligned address
-        const result = await bus.read(0x12345678);
-
-        // Combine the four bytes into a 32-bit integer
-        const expectedValue =
-            (await ram1.read(0x12345678)) << 
-            16 | 
-            (await ram1.read(0x1234567C)) << 
-            8 | 
-            (await ram1.read(0x1234567E));
-
-        expect(result).toBe(expectedValue);
     });
 
     it('should throw an error for out of bounds read attempts', () => {

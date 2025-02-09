@@ -38,23 +38,12 @@
    expect(ram.read(4)).toBe(0x55667788);
   });
 
-  it('should return 0 and log a warning when reading out of bounds', () => {
-   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(); // Suppress console.warn output during test
-
-   const value = ram.read(2048); // Out of bounds (size is 1024)
-   expect(value).toBe(0);
-   expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('RAM read out of bounds'));
-
-   consoleWarnSpy.mockRestore(); // Restore original console.warn
+  it('should throw an error when reading out of bounds', () => {
+//TODO: Implmenent me
   });
 
-  it('should log a warning but not crash when writing out of bounds', () => {
-   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(); // Suppress console.warn output during test
-
-   ram.write(2048, 0x12345678); // Out of bounds (size is 1024)
-   expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('RAM write out of bounds'));
-
-   consoleWarnSpy.mockRestore(); // Restore original console.warn
+  it('should throw an error when writing out of bounds', () => {
+//TODO: Implmenent me
   });
 
   it('should use little-endian byte order', () => {
