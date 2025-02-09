@@ -23,94 +23,55 @@
         if (size !== 1 && size !== 2 && size !== 4) {
             throw new Error("Invalid read size. Must be 1, 2, or 4.");
         }
-        
-        // Debug: Log the address being read
+
+        // Verify the address range
+        const start = Math.floor(address / 4) * 4;
+        if (address < start || address > start + size * 3) {
+            throw new Error(`Address out of bounds for size ${size}`);
+        }
+
         console.log(`Bus.read(0x${address.toString(16, 8)}, ${size})`);
-        
+
+        let result = null;
+        const alignedAddress = Math.floor(address / 4) * 4;
+
+        // Find the first device that covers this address
         for (const deviceEntry of this.devices) {
-            const result = deviceEntry.device.read(address);
-            // Check if address falls within device's range
-            const start = deviceEntry.startAddress;
-            const end = deviceEntry.endAddress;
-            if (address >= start && address <= end) {
-                try {
-                    // Read the exact number of bytes needed, considering word alignment
-                    const alignedAddress = address - (address % 4);
-                    const offsetInWord = address % 4;
-                    
-                    // Determine which word we're reading from the device
-                    const wordIndex = Math.floor(alignedAddress / 4);
-                    const byteOffsetWithinWord = offsetInWord;
-
-                    // Read the word from the device, then extract specific bytes
-                    const wordValue = deviceEntry.device.read(4 * wordIndex);
-                    
-                    // Rebuild the result based on the word and size
-                    switch (size) {
-                        case 1:
-                            result = ((wordValue >> byteOffsetWithinWord) & 0xFF);
-                            break;
-                        case 2:
-                            result = ((wordValue >> (byteOffsetWithinWord * 2)) & 0xFFFF);
-                            break;
-                        case 4:
-                            result = wordValue;
-                            break;
-                        default:
-                            throw new Error("Invalid size");
-                    }
-                    
-                    console.log(`Found matching device at 0x${start.toString(16, 8)}-0x${end.toString(16, 8)} returning value 0x${result.toString(16, 8)}`);
-                } catch (error) {
-                    console.error(`Error reading from device: ${error.message}`);
-                }
-            }
-        }
-
-        if (!result) {
-            throw new Error(`No device found at address: 0x${address.toString(16)}`);
-        }
-
-        let result;
-        for (const deviceEntry of this.devices) {
-            // Check if address falls within device's range
-            const start = deviceEntry.startAddress;
-            const end = deviceEntry.endAddress;
-            
-            if (address < start || address > end) {
+            const { start: devStart, end: devEnd } = deviceEntry;
+            if (address > devEnd || address < devStart) {
                 continue;
             }
 
-            // Word-align the address
-            const alignedAddress = address - (address % 4);
-            const offsetInWord = address % 4;
-
-            // Find which word in the device's memory we're accessing
-            const deviceOffset = alignedAddress - start;
-            const deviceWordIndex = Math.floor(deviceOffset / 4);
-
-            // Read the word from the device
-            const word = deviceEntry.device.read(4 * deviceWordIndex);
-
-            // Rebuild the result based on the word and size
-            switch (size) {
-                case 1:
-                    result = ((word >> (offsetInWord)) & 0xFF);
-                    break;
-                case 2:
-                    result = ((word >> (2 * offsetInWord)) & 0xFFFF);
-                    break;
-                case 4:
-                    result = word;
-                    break;
-                default:
-                    throw new Error("Invalid size");
+            try {
+                // Get the full word at aligned address
+                const wordIndex = Math.floor(alignedAddress / 4);
+                const word = deviceEntry.device.read(4 * wordIndex);
+                
+                // Extract specific bytes based on size and offset
+                const offset = alignedAddress % 4;
+                switch (size) {
+                    case 1:
+                        result = ((word >> offset) & 0xFF);
+                        break;
+                    case 2:
+                        result = ((word >> (offset * 2)) & 0xFFFF);
+                        break;
+                    case 4:
+                        result = word;
+                        break;
+                }
+                
+                // If we found matching device, return the value
+                if (result !== null) {
+                    console.log(`Found matching device at ${devStart.toString(16, 8)}-${devEnd.toString(16, 8)}`);
+                    return result;
+                }
+            } catch (error) {
+                console.error(`Error reading from device: ${error.message}`);
             }
         }
 
-        if (!result) {
-            throw new Error(`No device found at address: 0x${address.toString(16)}`);
-        }
+        throw new Error(`No device found at address: 0x${address.toString(16)}`);
     }
 
     write(address, value, size = 4) {
@@ -119,7 +80,7 @@
         }
 
         // Word-align the address
-        const alignedAddress = address - (address % 4);
+        const alignedAddress = Math.floor(address / 4) * 4;
         const offsetInWord = address % 4;
 
         for (const deviceEntry of this.devices) {
@@ -127,35 +88,38 @@
                 continue;
             }
 
-            // Calculate which word in the device's memory we're accessing
-            const deviceOffset = alignedAddress - deviceEntry.startAddress;
-            const deviceWordIndex = Math.floor(deviceOffset / 4);
+            try {
+                // Calculate which word in the device's memory we're accessing
+                const deviceOffset = alignedAddress - deviceEntry.startAddress;
+                const deviceWordIndex = Math.floor(deviceOffset / 4);
 
-            // Read the current word from the device at this offset
-            let originalWord = deviceEntry.device.read(4 * deviceWordIndex);
+                // Get current word from the device
+                const originalWord = deviceEntry.device.read(4 * deviceWordIndex);
 
-            // Create a buffer to modify the word
-            const buffer = new ArrayBuffer(4);
-            const view = new DataView(buffer);
-            
-            switch (size) {
-                case 1:
-                    view.setUint8(offsetInWord, value);
-                    break;
-                case 2:
-                    view.setUint16(offsetInWord, value, true); // little-endian
-                    break;
-                case 4:
-                    view.setUint32(0, value, true);
-                    break;
-                default:
-                    throw new Error("Invalid size");
+                // Create a buffer to modify the word
+                const buffer = new ArrayBuffer(4);
+                const view = new DataView(buffer);
+                
+                // Set desired value into the buffer
+                switch (size) {
+                    case 1:
+                        view.setUint8(offsetInWord, value);
+                        break;
+                    case 2:
+                        view.setUint16(offsetInWord, value, true); // little-endian
+                        break;
+                    case 4:
+                        view.setUint32(0, value, true);
+                        break;
+                }
+
+                const newWord = view.getUint32(0, true);
+
+                // Write the modified word back to the device
+                deviceEntry.device.write(deviceOffset, newWord, 4);
+            } catch (error) {
+                console.error(`Error writing to device: ${error.message}`);
             }
-
-            const newWord = view.getUint32(0, true);
-
-            // Write the modified word back to the device
-            deviceEntry.device.write(deviceOffset, newWord);
         }
     }
 }

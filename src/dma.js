@@ -70,52 +70,54 @@
   }
 
   performTransfer() {
-   let bytesTransferred = 0;
-   let sourceAddr = this.sourceAddress;
-   let destAddr = this.destinationAddress;
-   let length = this.transferLength;
-   let status;
-   let maskedStatus;
-
-   const checkStatus = () => {
-    status = this.bus.read(this.statusAddress);
-    maskedStatus = status & this.statusMask;
-    return maskedStatus === this.statusValue;
-   };
-
-   const transferChunk = () => {
-    console.log(`DMA: bytesTransferred=${bytesTransferred}, length=${length}, sourceAddr=0x${sourceAddr.toString(16)}, destAddr=0x${destAddr.toString(16)}`); // Debugging
-
-    if (bytesTransferred >= length || !(this.controlRegister & 0x01)) {
-     this.transferComplete = true;
-     this.controlRegister &= ~0x01; // Clear the enable bit
-     if (this.interruptHandler && (this.controlRegister & 0x02)) { //Check Interrupt Enable bit
-      this.interruptHandler();
-     }
-     return;
+    if (this.transferLength === 0) {
+      throw new Error("DMA transfer length is zero. Aborting.");
     }
 
-    if (!checkStatus()) {
-     console.log("DMA: Waiting for peripheral to be ready");
-     // Wait for the peripheral to be ready
-     setTimeout(transferChunk, 0); // Use setTimeout to avoid blocking
-     return;
+    // Ensure we're not already in a transfer
+    if (this.controlRegister & 0x01) {
+      this.transferComplete = false;
+      this.controlRegister &= ~0x01; // Clear the enable bit
+      if (this.interruptHandler && (this.controlRegister & 0x02)) {
+        this.interruptHandler();
+      }
     }
 
-    // read from memory in words
-    let data = this.bus.read(sourceAddr);
-    console.log(`DMA: Read data 0x${data.toString(16)} from address 0x${sourceAddr.toString(16)}`);
-    this.bus.write(destAddr, data);
-    console.log(`DMA: Wrote data 0x${data.toString(16)} to address 0x${destAddr.toString(16)}`);
+    const transferChunk = () => {
+      if (!checkStatus() || bytesTransferred >= length) {
+        if (bytesTransferred >= length) {
+          this.transferComplete = true;
+          this.controlRegister &= ~0x01; // Clear the enable bit
+          if (this.interruptHandler && (this.controlRegister & 0x02)) { 
+            this.interruptHandler();
+          }
+          return;
+        }
 
-    bytesTransferred += 4;
-    sourceAddr += 4;
-    destAddr += 4;
+        // If no peripheral ready, wait before continuing
+        console.log("DMA: Waiting for peripheral to be ready");
+        setTimeout(transferChunk, 0);
+        return;
+      }
 
-    setTimeout(transferChunk, 0); // Continue the transfer asynchronously
-   };
+      // Read data from source and write to destination
+      const data = this.bus.read(sourceAddr);
+      console.log(`DMA: Transferred data 0x${data.toString(16)} from ${sourceAddr.toString(16)}`);
+      this.bus.write(destAddr, data);
+      bytesTransferred += 4;
+      sourceAddr += 4;
+      destAddr += 4;
 
-   transferChunk(); // Start the initial transfer
+      // Continue transfer after short delay
+      setTimeout(transferChunk, 1); // Use setTimeout to avoid blocking
+    };
+
+    const checkStatus = () => {
+      const status = this.bus.read(this.statusAddress);
+      return (status & this.statusMask) === this.statusValue;
+    };
+
+    transferChunk();
   }
  }
 
