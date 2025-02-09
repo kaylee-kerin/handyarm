@@ -66,7 +66,6 @@
    }
 
    if (this.controlRegister & 0x01) { // Check Enable bit
-    this.bytesTransferred = 0;
     this.transferComplete = false; // Reset the transferComplete flag
     this.performTransfer();
    }
@@ -76,30 +75,27 @@
     // Implementation: copy transferLength bytes from source to destination
     
     while (this.transferLength > 0) {
+        console.log(this.sourceAddress,this.destAddress,this.transferLength);
         // Read the 4-byte chunk from the source address
         const srcBytes = this.bus.read(this.sourceAddress);
         
         // Write those bytes to the destination address
+//TODO: Handle destination address that are not 32-byte aligned.  Right now, instead of being 8-byte aligned for a dataSize=1, they're always 32-byte aligned.
         this.bus.write(this.destAddress, srcBytes);
         
         // Update transfer registers and handle increment flags
         if (this.controlRegister & 0x02) { // Source increment bit set (bit 1)
             this.sourceAddress += this.dataSize;
-        } else {
-            break; // Stop if source should not increment
         }
 
         if (this.controlRegister & 0x04) { // Dest increment bit set (bit 2)
             this.destAddress += this.dataSize;
-        } else {
-            break; // Stop if destination should not increment
         }
 
         this.transferLength -= this.dataSize;
     }
     
     // Update transfer registers and indicate transfer is complete
-    this.transferLength = 0;
     this.controlRegister &= 0xFFFFFFFE; // Clear the transfer Complete bit
     this.transferComplete = true;
   }
