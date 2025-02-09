@@ -1,0 +1,30 @@
+
+# 2025-02-09 02:58:33.740214
++let's get the current files added to git.
+
+# 2025-02-09 02:58:36.766877
++/run git add .
+
+# 2025-02-09 02:58:36.767048
++/run git add .
+
+# 2025-02-09 02:58:36.895789
++/run git commit -m "Add initial files"
+
+# 2025-02-09 02:58:36.895946
++/run git commit -m "Add initial files"
+
+# 2025-02-09 02:58:48.166329
++commit them.
+
+# 2025-02-09 02:58:51.988530
++/run git config --global --add safe.directory /home/ubuntu/project
+
+# 2025-02-09 02:58:51.988675
++/run git config --global --add safe.directory /home/ubuntu/project
+
+# 2025-02-09 02:58:52.126639
++/run git add .
+
+# 2025-02-09 02:58:52.126789
++/run git add .
