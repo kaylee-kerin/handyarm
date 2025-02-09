@@ -5,9 +5,6 @@ A JavaScript-based computer emulator focusing on ARM Thumb instruction set imple
 ## Table of Contents
 - [Introduction](#introduction)
 - [Architecture Overview](#architecture-overview)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
@@ -41,50 +38,3 @@ The system is built around several core components:
 - UART implementation with receive/transmit callbacks
 - src/uart.js
 
-## Getting Started
-
-1. Clone the repository:
-```bash
-git clone [your-repository-url]
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Run tests:
-```bash
-npm test
-```
-
-4. Start development server:
-```bash
-npm run dev
-```
-
-## Contributing
-
-Fork the project and create a pull request for any changes. When contributing:
-
-1. Clone the repository
-2. Create a feature branch
-3. Commit your changes with clear commit messages
-4. Push to the branch
-5. Open a Pull Request
-
-Please follow these guidelines for your contributions:
-- Write unit tests for new features
-- Include documentation updates if needed
-- Discuss major architectural changes before implementation via Issues
-
-## License
-
-This project is licensed under the MIT License.
-
-## Contact
-
-For questions or suggestions, please open an Issue or contact:
-[Your Email Here]
-
-Thank you for your interest in this project!
