@@ -74,9 +74,8 @@
 
   performTransfer() {
     // Implementation: copy transferLength bytes from source to destination
-    const bytesToCopy = this.transferLength;
     
-    while (bytesToCopy > 0) {
+    while (this.transferLength > 0) {
         // Read the 4-byte chunk from the source address
         const srcBytes = this.bus.read(this.sourceAddress);
         
@@ -84,9 +83,9 @@
         this.bus.write(this.destAddress, srcBytes);
         
         // Update the transfer registers and increment the addresses
-        this.sourceAddress += 1;
-        this.destAddress += 1;
-        bytesToCopy -= 4;
+        this.sourceAddress += this.dataSize;
+        this.destAddress += this.dataSize;
+        this.transferLength -= this.dataSize;
     }
     
     // Update transfer registers and indicate transfer is complete
