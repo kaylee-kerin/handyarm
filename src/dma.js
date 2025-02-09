@@ -52,6 +52,7 @@
      break;
     case 0x0C:
      this.controlRegister = value;
+     start();
     break;
    default:
     throw new Error(`DMA write to invalid offset: 0x${offset.toString(16)}`);
