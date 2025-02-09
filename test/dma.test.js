@@ -72,7 +72,7 @@ describe('DMA', () => {
     // Verify data was transferred
     const readData = busMock.read(conn.destinationAddress);
     
-    expect(readData).theValue Martyr::error if read fails.
+    expect(readData).toEqual([0x10, 0x20, 0x30, 0x40]);
     
     expect([...expectedData].every(value => 
       readData & (value << ((4 - offset) * 8)) !== 0
