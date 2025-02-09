@@ -24,37 +24,46 @@
             throw new Error("Invalid read size. Must be 1, 2, or 4.");
         }
 
+        let result;
         for (const deviceEntry of this.devices) {
-            if (address >= deviceEntry.startAddress && address <= deviceEntry.endAddress) {
-                const alignedAddress = address - (address % 4); // Word-align the address
-                const offsetInWord = address % 4;
-                const deviceOffset = alignedAddress - deviceEntry.startAddress;
+            // Check if address falls within device's range
+            const start = deviceEntry.startAddress;
+            const end = deviceEntry.endAddress;
+            
+            if (address < start || address > end) {
+                continue;
+            }
 
-                const word = deviceEntry.device.read(deviceOffset);
+            // Word-align the address
+            const alignedAddress = address - (address % 4);
+            const offsetInWord = address % 4;
 
-                const buffer = new ArrayBuffer(4);
-                const view = new DataView(buffer);
-                view.setUint32(0, word, true); // little-endian
+            // Find which word in the device's memory we're accessing
+            const deviceOffset = alignedAddress - start;
+            const deviceWordIndex = Math.floor(deviceOffset / 4);
 
-                let result;
-                switch (size) {
-                    case 1:
-                        result = view.getUint8(offsetInWord);
-                        break;
-                    case 2:
-                        result = view.getUint16(offsetInWord, true);  // little-endian
-                        break;
-                    case 4:
-                        result = word;
-                        break;
-                    default:
-                        throw new Error("Invalid size");
-                }
-                return result;
+            // Read the word from the device
+            const word = deviceEntry.device.read(4 * deviceWordIndex);
+
+            // Rebuild the result based on the word and size
+            switch (size) {
+                case 1:
+                    result = ((word >> (offsetInWord)) & 0xFF);
+                    break;
+                case 2:
+                    result = ((word >> (2 * offsetInWord)) & 0xFFFF);
+                    break;
+                case 4:
+                    result = word;
+                    break;
+                default:
+                    throw new Error("Invalid size");
             }
         }
 
-        throw new Error(`No device found at address: 0x${address.toString(16)}`);
+        if (!result) {
+            throw new Error(`No device found at address: 0x${address.toString(16)}`);
+        }
     }
 
     write(address, value, size = 4) {
@@ -62,43 +71,45 @@
             throw new Error("Invalid write size. Must be 1, 2, or 4.");
         }
 
+        // Word-align the address
+        const alignedAddress = address - (address % 4);
+        const offsetInWord = address % 4;
+
         for (const deviceEntry of this.devices) {
-            if (address >= deviceEntry.startAddress && address <= deviceEntry.endAddress) {
-                const alignedAddress = address - (address % 4); // Word-align the address
-                const offsetInWord = address % 4;
-                const deviceOffset = alignedAddress - deviceEntry.startAddress;
-
-                // Read the original word
-                let originalWord = deviceEntry.device.read(deviceOffset);
-
-                const buffer = new ArrayBuffer(4);
-                const view = new DataView(buffer);
-                view.setUint32(0, originalWord, true); // little-endian
-
-                // Modify the word based on the size
-                switch (size) {
-                    case 1:
-                        view.setUint8(offsetInWord, value);
-                        break;
-                    case 2:
-                        view.setUint16(offsetInWord, value, true); // little-endian
-                        break;
-                    case 4:
-                        view.setUint32(0, value, true);
-                        break;
-                    default:
-                        throw new Error("Invalid size");
-                }
-
-                let newWord = view.getUint32(0, true);
-
-                // Write the modified word back to memory
-                deviceEntry.device.write(deviceOffset, newWord);
-                return;
+            if (address < deviceEntry.startAddress || address > deviceEntry.endAddress) {
+                continue;
             }
-        }
 
-        throw new Error(`No device found at address: 0x${address.toString(16)}`);
+            // Calculate which word in the device's memory we're accessing
+            const deviceOffset = alignedAddress - deviceEntry.startAddress;
+            const deviceWordIndex = Math.floor(deviceOffset / 4);
+
+            // Read the current word from the device at this offset
+            let originalWord = deviceEntry.device.read(4 * deviceWordIndex);
+
+            // Create a buffer to modify the word
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            
+            switch (size) {
+                case 1:
+                    view.setUint8(offsetInWord, value);
+                    break;
+                case 2:
+                    view.setUint16(offsetInWord, value, true); // little-endian
+                    break;
+                case 4:
+                    view.setUint32(0, value, true);
+                    break;
+                default:
+                    throw new Error("Invalid size");
+            }
+
+            const newWord = view.getUint32(0, true);
+
+            // Write the modified word back to the device
+            deviceEntry.device.write(deviceOffset, newWord);
+        }
     }
 }
 
