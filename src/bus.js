@@ -8,6 +8,15 @@
             throw new Error("Device must implement read and write functions.");
         }
 
+        // Check against all existing devices to ensure no overlapping ranges
+        const isOverlapping = this.devices.some(deviceEntry => 
+            Math.max(deviceEntry.start, startAddress) < Math.min(deviceEntry.end, endAddress)
+        );
+
+        if (isOverlapping) {
+            throw new Error("Attached device overlaps with existing range");
+        }
+
         if (startAddress > endAddress) {
             throw new Error("Start address must be less than or equal to end address.");
         }
@@ -39,12 +48,15 @@
             }
 
             try {
-                // Read the full word from the device
+                // Read all four bytes from the device
                 const wordIndex = Math.floor(alignedAddress / 4);
-                const word = deviceEntry.device.read(4 * wordIndex);
-                
-                // Return the entire 32-bit word value
-                return word;
+                const byte1 = deviceEntry.device.read(4 * wordIndex);
+                const byte2 = deviceEntry.device.read(4 * (wordIndex + 1));
+                const byte3 = deviceEntry.device.read(4 * (wordIndex + 2));
+                const byte4 = deviceEntry.device.read(4 * (wordIndex + 3));
+
+                // Combine bytes into a single 32-bit value
+                return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
             } catch (error) {
                 console.error(`Error reading from device: ${error.message}`);
             }
