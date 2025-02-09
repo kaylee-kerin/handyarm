@@ -75,12 +75,15 @@
     // Implementation: copy transferLength bytes from source to destination
     
     while (this.transferLength > 0) {
-        console.log(this.sourceAddress,this.destAddress,this.transferLength);
+        //TODO: We need to handle a few different scenarios: 
+        //source address is not-aligned to a 32-byte boundary
+        //destination address is not-aligned to a 32-byte boundary
+        //data size could be 1, 2 or 4 bytes per transfer.
+
         // Read the 4-byte chunk from the source address
         const srcBytes = this.bus.read(this.sourceAddress);
         
         // Write those bytes to the destination address
-//TODO: Handle destination address that are not 32-byte aligned.  Right now, instead of being 8-byte aligned for a dataSize=1, they're always 32-byte aligned.
         this.bus.write(this.destAddress, srcBytes);
         
         // Update transfer registers and handle increment flags
