@@ -17,6 +17,13 @@
    this.transferComplete = false; // Internal flag
    this.interruptHandler = null; // Callback for interrupts
    this.bytesTransferred = 0;
+   
+   // Bus Fault handler
+   this.bus.onBusFault = (error) => {
+    console.error(`DMA bus fault: ${error}`);
+    this.controlRegister |= 0x01; // Set status register to indicate fault
+    this.transferComplete = false; // Reset transfer complete flag
+   };
   }
 
   // Register access methods
@@ -50,7 +57,9 @@
      break;
     case 0x0C:
      this.controlRegister = value;
-     this.start();
+     if (value & 0x01) { // Enable bit set
+       this.start();
+     }
      break;
     case 0x10:
      this.dataSize = value;
