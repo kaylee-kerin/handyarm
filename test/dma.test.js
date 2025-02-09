@@ -1,3 +1,5 @@
+const DMA = require('../src/dma');
+
 describe('DMA', () => {
   // Mock up some peripheral devices we'll work with
   const Peripheral = class {
