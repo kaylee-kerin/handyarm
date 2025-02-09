@@ -47,6 +47,37 @@ describe('MemoryBus', () => {
     });
 
     it('should not allow overlapping ranges', () => {
-//TODO: Implement me!
+        expect(() => {
+            bus.attach(ram1, 0x00000000, 0x000003FF);
+            bus.attach(ram2, 0x00000000, 0x00000400);
+        }).toThrow();
+    });
+
+    it('should read 32-bit aligned data', async () => {
+        // Set up two devices with overlapping ranges for testing
+        const ram1 = new RAM(1024);  // 1KB RAM
+        const ram2 = new RAM(2048);  // 2KB RAM
+        
+        bus.attach(ram1, 0x00000000, 0x000003FF);
+        bus.attach(ram2, 0x00040000, 0x00000BFF);
+
+        // Test with a 32-bit aligned address
+        const result = await bus.read(0x12345678);
+
+        // Combine the four bytes into a 32-bit integer
+        const expectedValue =
+            (await ram1.read(0x12345678)) << 
+            16 | 
+            (await ram1.read(0x1234567C)) << 
+            8 | 
+            (await ram1.read(0x1234567E));
+
+        expect(result).toBe(expectedValue);
+    });
+
+    it('should throw an error for out of bounds read attempts', () => {
+        expect(() => {
+            bus.read(0x00000100); // Address beyond both devices
+        }).toThrow();
     });
 });
