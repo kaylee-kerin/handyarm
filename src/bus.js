@@ -78,10 +78,10 @@
                 // Modify the word based on the size
                 switch (size) {
                     case 1:
-                        view.setUint8(offsetInWord, value & 0xFF);
+                        view.setUint8(offsetInWord, value);
                         break;
                     case 2:
-                        view.setUint16(offsetInWord, value & 0xFFFF, true); // little-endian
+                        view.setUint16(offsetInWord, value, true); // little-endian
                         break;
                     case 4:
                         view.setUint32(0, value, true);
