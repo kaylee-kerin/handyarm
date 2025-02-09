@@ -10,13 +10,11 @@
     return undefined;  // Special case for empty ROM
    }
    if (offset < 0 || offset >= this.size) {
-    console.warn(`ROM read out of bounds: offset 0x${offset.toString(16)}`);
-    return 0; // Or throw an error, depending on your design
+    throw new Error(`ROM read out of bounds: offset 0x${offset.toString(16)}`);
    }
 
    if (offset % 4 !== 0) {
-    console.warn(`ROM read from unaligned address: 0x${offset.toString(16)}`);
-    return 0;
+    throw new Error(`ROM read from unaligned address: 0x${offset.toString(16)}`);
    }
 
    const wordIndex = offset / 4;
@@ -24,7 +22,7 @@
   }
 
   write(offset, value) {
-   console.warn("Attempted write to ROM at offset: 0x" + offset.toString(16));
+   throw new Error(`Attempted write to ROM at offset: 0x${offset.toString(16)}`);
    // ROM is read-only, so we do nothing.
   }
  }
