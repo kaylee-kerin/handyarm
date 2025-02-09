@@ -19,20 +19,16 @@
         });
     }
 
-    read(address, size = 4) {
-        if (size !== 1 && size !== 2 && size !== 4) {
-            throw new Error("Invalid read size. Must be 1, 2, or 4.");
-        }
-
+    read(address) {
         // Verify the address range
         const start = Math.floor(address / 4) * 4;
-        if (address < start || address > start + size * 3) {
-            throw new Error(`Address out of bounds for size ${size}`);
+        if (address < start || address > start + 3) {
+            console.warn(`Bus.read out of bounds: address 0x${address.toString(16)}`);
+            return undefined;
         }
 
-        console.log(`Bus.read(0x${address.toString(16, 8)}, ${size})`);
+        console.log(`Bus.read(0x${address.toString(16, 8)})`);
 
-        let result = null;
         const alignedAddress = Math.floor(address / 4) * 4;
 
         // Find the first device that covers this address
@@ -43,29 +39,12 @@
             }
 
             try {
-                // Get the full word at aligned address
+                // Read the full word from the device
                 const wordIndex = Math.floor(alignedAddress / 4);
                 const word = deviceEntry.device.read(4 * wordIndex);
                 
-                // Extract specific bytes based on size and offset
-                const offset = alignedAddress % 4;
-                switch (size) {
-                    case 1:
-                        result = ((word >> offset) & 0xFF);
-                        break;
-                    case 2:
-                        result = ((word >> (offset * 2)) & 0xFFFF);
-                        break;
-                    case 4:
-                        result = word;
-                        break;
-                }
-                
-                // If we found matching device, return the value
-                if (result !== null) {
-                    console.log(`Found matching device at ${devStart.toString(16, 8)}-${devEnd.toString(16, 8)}`);
-                    return result;
-                }
+                // Return the entire 32-bit word value
+                return word;
             } catch (error) {
                 console.error(`Error reading from device: ${error.message}`);
             }
