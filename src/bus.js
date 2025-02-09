@@ -27,7 +27,7 @@
             return undefined;
         }
 
-        console.log(`Bus.read(0x${address.toString(16, 8)})`);
+        //console.log(`Bus.read(0x${address.toString(16, 8)})`);
 
         const alignedAddress = Math.floor(address / 4) * 4;
 
