@@ -10,9 +10,15 @@ class ARMThumbCPU extends CPU {
         this.apsr = 0; // Application Program Status Register
     }
 
-     fetch() {                                                                                                  
-         this.currentInstruction = this.bus.read(this.pc);                                                      
-     }                                                                                                          
+    fetch() {
+        try {
+            this.currentInstruction = this.bus.read(this.pc);
+        } catch (error) {
+            // Handle bus error, e.g., set a flag in the APSR
+            console.error("Bus error during fetch:", error);
+            // ... additional error handling ...
+        }
+    }
                                                                                                                 
      execute() {                                                                                          
          switch (this.currentInstruction >> 8) {                                                                
