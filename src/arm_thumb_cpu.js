@@ -10,19 +10,27 @@ class ARMThumbCPU extends CPU {
         this.apsr = 0; // Application Program Status Register
     }
 
-    fetch() {
-        // Implement Thumb instruction fetch
-        console.log("ARMThumbCPU: Fetching instruction");
-    }
-
-    decode() {
-        // Implement Thumb instruction decode
-        console.log("ARMThumbCPU: Decoding instruction");
-    }
-
-    execute() {
-        // Implement Thumb instruction execute
-        console.log("ARMThumbCPU: Executing instruction");
+     fetch() {                                                                                                  
+         this.currentInstruction = this.bus.read(this.pc);                                                      
+     }                                                                                                          
+                                                                                                                
+     decode() {                                                                                                 
+         if (this.currentInstruction === 0xBF00) {                                                              
+             this.opcode = 'nop';                                                                               
+         } else {                                                                                               
+             //TODO: Implement other opcodes                                                                    
+             throw new Error(`Unknown opcode: 0x${this.currentInstruction.toString(16)}`);                      
+         }                                                                                                      
+     }                                                                                                          
+                                                                                                                
+     execute() {                                                                                                
+         switch (this.opcode) {                                                                                 
+             case 'nop':                                                                                        
+                 this.pc += 2; // Advance PC for Thumb instruction                                              
+                 break;                                                                                         
+             default:                                                                                           
+                 throw new Error(`Unknown opcode: ${this.opcode}`);                                             
+         }              
     }
 
     reset() {
