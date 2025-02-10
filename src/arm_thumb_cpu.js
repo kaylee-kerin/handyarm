@@ -15,16 +15,26 @@ class ARMThumbCPU extends CPU {
      }                                                                                                          
                                                                                                                 
      decode() {                                                                                                 
-         if (this.currentInstruction === 0xBF00) {                                                              
-             this.opcode = 'nop';                                                                               
-         } else {                                                                                               
-             //TODO: Implement other opcodes                                                                    
-             throw new Error(`Unknown opcode: 0x${this.currentInstruction.toString(16)}`);                      
+         switch (this.currentInstruction >>8) {
+             case 0x20: // MOVS Rd, #imm
+                 this.opcode = 'movs';
+                 this.rd = (this.currentInstruction & 0x0700) >> 8;
+                 this.imm = this.currentInstruction & 0x00FF;
+                 break; 
+             case 0xBF:
+                 this.opcode = 'nop';
+                 break;
+             default:
+                 throw new Error(`Unknown opcode: 0x${this.currentInstruction.toString(16)}`);
          }                                                                                                      
      }                                                                                                          
                                                                                                                 
      execute() {                                                                                                
-         switch (this.opcode) {                                                                                 
+         switch (this.opcode) {
+             case 'movs':
+                 this.regs[this.rd] = this.imm;                                                                 
+                 this.pc += 2;                                                                                  
+                 break;                                                                                         
              case 'nop':                                                                                        
                  this.pc += 2; // Advance PC for Thumb instruction                                              
                  break;                                                                                         
