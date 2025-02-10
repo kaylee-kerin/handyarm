@@ -32,27 +32,27 @@ describe("ARMThumbCPU", () => {
          }                                                                                                      
                                                                                                                 
          cpu.reset();                                                                                           
-         cpu.step();                                                                                            
-                                                                                                                
-         // PC should have incremented by 2 (Thumb instruction size)                                            
-         expect(cpu.pc).toBe(0x00000002);                                                                       
-     });                                                                                                        
-                                                                                                                
-     it("should fetch, decode, and execute a MOV instruction", () => {                                          
-         // Load a simple program into RAM.                                                                     
-         const program = new Uint32Array([0x2001]); // Example instruction: MOVS r0, #1                         
-                                                                                                                
-         for (let i = 0; i < program.length; ++i) {                                                             
-             ram.write(i * 4, program[i]);                                                                      
-         }                                                                                                      
-                                                                                                                
-         cpu.reset();                                                                                           
-         cpu.step();                                                                                            
-                                                                                                                
-         // PC should have incremented by 2 (Thumb instruction size)                                            
-         expect(cpu.pc).toBe(0x00000002);                                                                       
-                                                                                                                
-         //r0 should be 1                                                                                       
-         expect(cpu.regs[0]).toBe(0x00000001);                                                                  
-     });                                                                                                        
- });           
+         cpu.step();
+
+         // PC should have incremented by 2 (Thumb instruction size)
+         expect(cpu.pc).toBe(0x00000002);
+     });
+
+     it("should fetch, decode, and execute a MOV instruction", () => {
+         // Load a simple program into RAM.
+         const program = new Uint32Array([0x2001]); // Example instruction: MOVS r0, #1
+
+         for (let i = 0; i < program.length; ++i) {
+             ram.write(i * 4, program[i]);
+         }
+
+         cpu.reset();
+         cpu.step();
+
+         // PC should have incremented by 2 (Thumb instruction size)
+         expect(cpu.pc).toBe(0x00000002);
+
+         //r0 should be 1
+         expect(cpu.regs[0]).toBe(0x00000001);
+     });
+ });
