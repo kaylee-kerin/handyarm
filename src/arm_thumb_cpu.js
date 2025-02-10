@@ -14,36 +14,21 @@ class ARMThumbCPU extends CPU {
          this.currentInstruction = this.bus.read(this.pc);                                                      
      }                                                                                                          
                                                                                                                 
-     decode() {                                                                                                 
-         switch (this.currentInstruction >>8) {
-             case 0x20: // MOVS Rd, #imm
-                 this.opcode = 'movs';
-                 this.rd = (this.currentInstruction & 0x0700) >> 8;
-                 this.imm = this.currentInstruction & 0x00FF;
-                 break; 
-             case 0xBF:
-                 this.opcode = 'nop';
-                 break;
-             default:
-                 throw new Error(`Unknown opcode: 0x${this.currentInstruction.toString(16)}`);
-         }                                                                                                      
-     }                                                                                                          
-                                                                                                                
-     execute() {                                                                                                
-         switch (this.opcode) {
-             case 'movs':
-                 this.regs[this.rd] = this.imm;                                                                 
+     execute() {                                                                                          
+         switch (this.currentInstruction >> 8) {                                                                
+             case 0x20: // MOVS Rd, #imm                                                                        
+                 this.regs[(this.currentInstruction & 0x0700) >> 8] = this.currentInstruction & 0x00FF;         
                  this.pc += 2;                                                                                  
                  break;                                                                                         
-             case 'nop':                                                                                        
-                 this.pc += 2; // Advance PC for Thumb instruction                                              
+             case 0xBF: // NOP                                                                                  
+                 this.pc += 2;                                                                                  
                  break;                                                                                         
              default:                                                                                           
-                 throw new Error(`Unknown opcode: ${this.opcode}`);                                             
-         }              
-    }
+                 throw new Error(`Invalid Opcode Prefix: ${this.currentInstructions}`);
+         }                                                                                                      
+     }                   
 
-    reset() {
+     reset() {
         // Implement CPU reset logic, initialize registers, etc.
         this.regs.fill(0);
         this.pc = 0; // Or the reset vector address
