@@ -30,11 +30,5 @@ The system is built around several core components:
 - RAM: Dynamic memory with bounds checking (src/ram.js)
 - ROM: Read-only storage with validation (src/rom.js)
 
-### 3. DMA Controller
-- Manages block transfers between devices and memory
-- src/dma.js
-
-### 4. Serial Communication
-- UART implementation with receive/transmit callbacks
-- src/uart.js
-
+### 3. Usage
+- Examples of C code used to interact with the block_input/block_output operations is available in usage_examples/

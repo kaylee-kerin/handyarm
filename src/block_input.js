@@ -1,11 +1,22 @@
 const { EventEmitter } = require('events');
 const { RAM } = require('./ram.js');
 
-/** We're going to implement a circular buffer, and a second of memory for the buffer inside this class.
+/** We're going to implement a circular buffer, and a set of memory for the buffer inside this class.
+ * A circular buffer has a start and end marker, and the data between them is the outstanding data to "read"
  *
- *  A circular buffer has a start and end marker, and the data between them is the outstanding data to "read"
+ * This can be used for marshalling data into from an emulated computer, like a serial port does - but with blocks
+ * of data instead of byte by byte.
+ *
+ * When the receiver gets a character from the buffer, it increments the start offset by however many characters are read.
+ * The host (this class) - only ever increments the end, and the guest (the emulated code) - only ever increments the start.
+ * This provides a stable (and atomic?) interface for the handoff of data in the circular buffer.
  */
 class Block_Input extends EventEmitter {
+    /** Construct a new Block Input, bus is a reference to the bus we're connected to, so we can use it for ...stuff.
+     *
+     * @param bus  Reference to the bus we're attached to.
+     * @param size //the size of the circular buffer (maximum single transmit size)
+     */
     constructor(bus,size) {
         super();
         this._bus = bus;
@@ -16,6 +27,12 @@ class Block_Input extends EventEmitter {
         this._end = 0;
     }
 
+    /** Append data to the circular buffer.
+     * TODO: return the number of bytes added to the buffer.
+     * TODO: Don't exception if it exceeds the buffer, just return the number of bytes actually added.
+     *
+     * @param data a buffer with the data to send.
+     */
     appendData(data){
         //copy the bytes from data into the circular buffer, data MUST be smaller than the buffer or an error occurs.
         //size your buffers appropriately.  It's not like RAM is constrained for this kinda use case!
