@@ -1,7 +1,7 @@
 {
-  "name": "handyarm",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@thinkulator/handyarm",
+  "version": "1.0.1",
+  "description": "A JavaScript-based computer emulator focusing on ARM Thumb instruction set implementation. This project provides core components (CPU, RAM, ROM, DMA, UART) for building hardware emulators in the browser.",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -10,6 +10,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+  },
+  "directories": {
+    "src":"src",
+    "example": "examples",
+    "test": "test"
+  },
+  "devDependencies": {
     "jest": "^29.7.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaylee-kerin/handyarm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kaylee-kerin/handyarm/issues"
+  },
+  "homepage": "https://github.com/kaylee-kerin/handyarm#readme"
 }
