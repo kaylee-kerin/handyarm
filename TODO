@@ -1,0 +1,7 @@
+Implement test coverage for DMA.js
+Implement end-to-end test moving data from the UART to RAM, using the DMA.
+Debug the UART-DMA-RAM test, adding tests as necessary to fix issues until the test covers correctly, and all tests pass.
+Implement end-to-end test moving data from the RAM to UART, using the DMA.
+Debug the RAM-DMA-UART test, adding tests as necessary to fix issues until the test covers correctly, and all tests pass.
+
+Write simple program that shows how use the library, for the UART/RAM use case and a user-defined string (like Hellorld!).
