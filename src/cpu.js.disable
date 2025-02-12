@@ -26,4 +26,4 @@ class CPU {
 }
 
 
-module.exports = CPU;
+module.export = {CPU};

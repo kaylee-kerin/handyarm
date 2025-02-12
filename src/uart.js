@@ -1,5 +1,5 @@
  // uart.js
- class UART {
+class UART {
   constructor() {
    this.rxData = 0; // Received data
    this.txData = 0; // Transmitted data (for testing)
@@ -38,4 +38,4 @@
   }
  }
 
- module.exports = UART;
+module.exports = {UART};

@@ -1,5 +1,5 @@
  // ram.test.js
- const RAM = require('../src/ram.js');
+ const {RAM} = require('../src/ram.js');
 
  describe('RAM', () => {
   let ram;

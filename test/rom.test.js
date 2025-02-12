@@ -1,5 +1,5 @@
  // rom.test.js (modified)
- const ROM = require('../src/rom.js');
+ const {ROM} = require('../src/rom.js');
 
  describe('ROM', () => {
   it('should create a ROM instance with the provided data', () => {

@@ -1,5 +1,5 @@
-const MemoryBus = require('../src/bus.js');
-const RAM = require('../src/ram.js');
+const { MemoryBus } = require('../src/bus.js');
+const { RAM } = require('../src/ram.js');
 
 describe('MemoryBus', () => {
     let bus;

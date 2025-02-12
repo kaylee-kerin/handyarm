@@ -1,4 +1,4 @@
-const CPU = require('./cpu');
+const {CPU} = require('./cpu');
 
 class ARMThumbCPU extends CPU {
     constructor(bus) {

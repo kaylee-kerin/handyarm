@@ -113,4 +113,4 @@
   }
  }
 
- module.exports = DMA;
+module.exports = {DMA};

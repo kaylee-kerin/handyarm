@@ -21,8 +21,8 @@ class RAM {
     }
 
     dump(){
-	console.log(this.buffer);
+        console.log(this.buffer);
     }
 }
 
-module.exports = RAM;
+module.exports = {RAM};

@@ -1,5 +1,5 @@
  // uart.test.js
- const UART = require('../src/uart');
+ const {UART} = require('../src/uart');
 
  describe('UART', () => {
   let uart;

@@ -1,4 +1,4 @@
- class MemoryBus {
+class MemoryBus {
     constructor() {
         this.devices = [];
     }
@@ -54,15 +54,14 @@
                 return deviceEntry.device.read(alignedAddress - deviceEntry.startAddress);
             } catch (error) {
                 // Implement a "Bus Fault" handler trigger here.
-                console.error("Bus read error:", error);
+                //console.error("Bus read error:", error);
                 // For now, re-throw the error
                 throw error;
             }
         }
 
         // If no device is found, return a default value (or throw an error)
-        console.warn(`No device found at address: 0x${address.toString(16)}`);
-        return 0;
+        throw new Error(`No device found at address: 0x${address.toString(16)}`);
     }
 
     write(address, value) { // Removed size parameter as it's not used
@@ -89,15 +88,16 @@
             try {
                 // Read all four bytes from the device
                 deviceEntry.device.write(alignedAddress-deviceEntry.startAddress,value);
-		return;
+      		    return;
 	    }catch(error){
 		//TODO: Implement a "Bus Fault" handler trigger here.
-		throw error;
+                throw error;
             }
         }
-
+	
         throw new Error(`No device found at address: 0x${address.toString(16)}`);
     }
 }
 
-module.exports = MemoryBus;
+
+module.exports = {MemoryBus};
