@@ -38,7 +38,7 @@ typedef struct HandyARM_FlashProgrammer_S {
 } __attribute__((packed)) HandyARM_FlashProgrammer;
 
 
-#define HANDYARM_FLASH_PROGRAMMER(addr) ((HandyARM_FlashProgrammer *)((void *)addr))
+#define HandyARM_FlashProg(addr) ((HandyARM_FlashProgrammer *)((void *)addr))
 
 
 #endif //HANDYARM_HANDYARM_H

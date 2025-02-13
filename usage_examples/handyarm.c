@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "handyarm.h"
 
 //Set the address(s) used for the data channels (Can be multiple, if the host mapped multiple)

@@ -69,7 +69,7 @@ class Block_Input extends EventEmitter {
                 if(address >= 0x100 && address < (0x100+this._size)){ //Map in the actual buffer
                     return this._ram.read(address-0x100);
                 }else{
-                    throw new Error(`Invalid read at address: ${address}`);
+                    throw new Error(`Invalid read at address: ${address.toString(16)}`);
                 }
         }
     }
@@ -83,7 +83,7 @@ class Block_Input extends EventEmitter {
             case 0x04: //we can't modify end, just ignore it.
                 break;
             default:
-                throw new Error(`Address write out of range for Block_IO: {address}`);
+                throw new Error(`Address write out of range for Block_IO: ${address.toString(16)}`);
         }
 
     }
