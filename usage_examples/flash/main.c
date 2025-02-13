@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "handyarm.h"
+#include "../handyarm.h"
 
 // Flash programmer base address (assuming it's mapped here, adjust as needed)
 #define FLASH_PROG_BASE (0xE1000000)

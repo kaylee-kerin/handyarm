@@ -11,7 +11,8 @@ typedef struct HandyARM_Transmit_S{
    volatile void *start_addr;
    volatile uint32_t length;  //The write to this register initiates the transfer
                                //IMMEDIATELY (and completes before the write returns)
-} __attribute((packed)) HandyARM_Transmit;
+} volatile __attribute((packed)) HandyARM_Transmit;
+//TODO: Should this be volatile?  Do I have a problem in the bus.js 16-bit write code? Probably.
 
 
 /** Receive Register map */
@@ -21,7 +22,8 @@ typedef struct HandyARM_Receive_S {
    volatile uint32_t length;
    volatile uint32_t padding[(0x100-12)/4]; //12 is the number of bytes the variables above this take up.
    volatile uint8_t buffer[]; //This is at address 0x100, pad it out above to put it there.
-} __attribute((packed)) HandyARM_Receive;
+} volatile __attribute((packed)) HandyARM_Receive;
+//TODO: Should this be volatile?  Do I have a problem in the bus.js 16-bit write code? Probably.
 
 #define HandyARM_R(addr) ((HandyARM_Receive *)((void *)addr))
 #define HandyARM_T(addr) ((HandyARM_Transmit *)((void *)addr))

@@ -130,3 +130,5 @@ dist
 .pnp.*
 .aider*
 .idea
+
+usage_examples/flash/build/*
