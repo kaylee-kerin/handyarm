@@ -15,7 +15,8 @@ class Flash {
     constructor(sizeInBytes, initialData) {
         this.size = sizeInBytes;
         // Initialize the flash memory with all bytes set to 0xFF (erased state)
-        this.buffer = new Uint8Array(sizeInBytes).fill(0xFF);
+        this.buffer = new Uint32Array(sizeInBytes).fill(0xFFFFFFFF);
+        this.initial = new Uint32Array(initialData);
 
         // If initial data is provided, load it into the flash memory
         if (initialData) {
@@ -23,13 +24,10 @@ class Flash {
                 throw new Error("Initial data exceeds Flash size.");
             }
 
-            for (let i = 0; i < Math.min(initialData.length, sizeInBytes); i++) {
-                this.buffer[i] = initialData[i];
+            for (let i = 0; i < this.initial.length; i++) {
+                this.buffer[i] = this.initial[i];
             }
         }
-
-        // Create a DataView from the buffer for efficient reading and writing of different data types
-        this.dataView = new DataView(this.buffer.buffer);
 
         // Default options, including bounds checking
         this.options = { bounds: true };
@@ -63,7 +61,7 @@ class Flash {
         }
 
         // Read a 32-bit word from the DataView (little-endian)
-        return this.dataView.getUint32(offset, true);
+        return this.buffer[offset/4];
     }
 
     /**
@@ -166,7 +164,7 @@ class Flash {
                     const newValue = (currentWord & value) >>> 0;
 
                     // Write the new value to flash
-                    this.flash.dataView.setUint32(this.currentOffset, newValue, true);
+                    this.flash.buffer[this.currentOffset/4] = newValue;
 
                     // Auto-increment the offset if auto-increment is enabled (bit 1 of controlRegister is set)
                     if (this.controlRegister & 0x02) {

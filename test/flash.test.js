@@ -17,7 +17,7 @@ describe('Flash Memory and Programmer Tests', () => {
     describe('Flash Class', () => {
         it('should initialize with all bytes set to 0xFF', () => {
             for (let i = 0; i < FLASH_SIZE; i++) {
-                assert.strictEqual(flash.buffer[i], 0xFF, `Byte at index ${i} is not 0xFF`);
+                assert.strictEqual(flash.buffer[i], 0xFFFFFFFF, `Byte at index ${i} is not 0xFFFFFFFF`);
             }
         });
 
@@ -43,11 +43,12 @@ describe('Flash Memory and Programmer Tests', () => {
         });
 
         it('should load initial data correctly', () => {
-            const initialData = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
+            const initialData = new ArrayBuffer(8);
+            const initialDataView = new Int8Array(initialData);
+            initialDataView.set([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]); //we're little endian
+
             flash = new Flash(FLASH_SIZE, initialData);
-            assert.strictEqual(flash.buffer[0], 0x01);
-            assert.strictEqual(flash.buffer[1], 0x02);
-            assert.strictEqual(flash.buffer[7], 0x08);
+            assert.strictEqual(flash.buffer[0], 0x04030201);
             assert.strictEqual(flash.read(0), 0x04030201);
         });
 
@@ -57,14 +58,45 @@ describe('Flash Memory and Programmer Tests', () => {
         });
 
         it('should read existing data correctly', () => {
-          // Set some data in the flash memory
-          const initialData = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);
-          flash = new Flash(FLASH_SIZE, initialData);
+            const initialData = new ArrayBuffer(8);
+            const initialDataView = new Int8Array(initialData);
+            initialDataView.set([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);
+            flash = new Flash(FLASH_SIZE, initialData);
 
-          // Read the data using flash.read()
-          const data = flash.read(0);
-          assert.strictEqual(data, 0x78563412, "Read data does not match initial data");
+            // Read the data using flash.read()
+            const data = flash.read(0);
+            assert.strictEqual(data, 0x78563412, "Read data does not match initial data");
         });
+    });
+
+    it('should match ROM when loading the same initial data', () => {
+        const { ROM } = require('../src/rom.js');
+
+        // Create test data
+        const initialData = new ArrayBuffer(16);
+        const dataView = new Int8Array(initialData);
+        dataView.set([
+            0x12, 0x34, 0x56, 0x78,  // First word: 0x78563412 (little-endian)
+            0x9A, 0xBC, 0xDE, 0xF0,  // Second word: 0xF0DEBC9A
+            0x11, 0x22, 0x33, 0x44,  // Third word: 0x44332211
+            0x55, 0x66, 0x77, 0x88   // Fourth word: 0x88776655
+        ]);
+
+        // Create ROM and Flash with same initial data
+        const rom = new ROM(initialData);
+        const flash = new Flash(FLASH_SIZE, initialData);
+
+        // Compare multiple addresses
+        for (let addr = 0; addr < initialData.byteLength; addr += 4) {
+            const romValue = rom.read(addr);
+            const flashValue = flash.read(addr);
+            assert.strictEqual(
+                flashValue,
+                romValue,
+                `Mismatch at address 0x${addr.toString(16)}: ` +
+                `ROM=0x${romValue.toString(16)}, Flash=0x${flashValue.toString(16)}`
+            );
+        }
     });
 
     describe('Programmer Class', () => {
@@ -94,9 +126,9 @@ describe('Flash Memory and Programmer Tests', () => {
         });
 
         it('should write value to flash, changing 1s to 0s only, and auto-increment', () => {
-            //Initial data
-            const initialData = new Uint8Array(FLASH_SIZE);
-            initialData.fill(0xFF);
+            const initialData = new ArrayBuffer(FLASH_SIZE);
+            const initialData8 = new Uint8Array(initialData);
+            initialData8.fill(0xFF);
             flash = new Flash(FLASH_SIZE, initialData);
             programmer = flash.getProgrammer();
 
@@ -156,8 +188,10 @@ describe('Flash Memory and Programmer Tests', () => {
         });
 
         it('should write a sequence of words correctly', () => {
-          const initialData = new Uint8Array(FLASH_SIZE);
-          initialData.fill(0xFF);
+
+          const initialData = new ArrayBuffer(FLASH_SIZE);
+          const initialData8 = new Uint8Array(initialData);
+          initialData8.fill(0xFF);
           flash = new Flash(FLASH_SIZE, initialData);
           programmer = flash.getProgrammer();
 
