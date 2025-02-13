@@ -37,7 +37,7 @@ typedef struct HandyARM_FlashProgrammer_S {
     volatile uint32_t value;          /**< Value (0x08) - Value to write to flash (write-only) */
     uint8_t padding_0[0x14];           /**< Padding to reach address 0x20 */
     volatile uint32_t erase_page;     /**< Erase Page (0x20) - Page number to erase (write-only) */
-} __attribute__((packed)) HandyARM_FlashProgrammer;
+} volatile __attribute__((packed)) HandyARM_FlashProgrammer;
 
 
 #define HandyARM_FlashProg(addr) ((HandyARM_FlashProgrammer *)((void *)addr))
