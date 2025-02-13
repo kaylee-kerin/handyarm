@@ -26,4 +26,19 @@ typedef struct HandyARM_Receive_S {
 #define HandyARM_R(addr) ((HandyARM_Receive *)((void *)addr))
 #define HandyARM_T(addr) ((HandyARM_Transmit *)((void *)addr))
 
+
+
+/** Flash Programmer Register Map */
+typedef struct HandyARM_FlashProgrammer_S {
+    volatile uint32_t control;        /**< Control Register (0x00) - Bit 0: Write Enable, Bit 1: Auto-Increment Enable */
+    volatile uint32_t offset;         /**< Offset (0x04) - Current offset into flash memory */
+    volatile uint32_t value;          /**< Value (0x08) - Value to write to flash (write-only) */
+    uint8_t padding_0[0x14];           /**< Padding to reach address 0x20 */
+    volatile uint32_t erase_page;     /**< Erase Page (0x20) - Page number to erase (write-only) */
+} __attribute__((packed)) HandyARM_FlashProgrammer;
+
+
+#define HANDYARM_FLASH_PROGRAMMER(addr) ((HandyARM_FlashProgrammer *)((void *)addr))
+
+
 #endif //HANDYARM_HANDYARM_H
