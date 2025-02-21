@@ -151,7 +151,7 @@ class Flash {
                     break;
                 case 0x08: // Value to modify Flash with
                     // Check if write is enabled (bit 0 of controlRegister is set)
-                    if (!(this.controlRegister & 0x01)) {
+                    if (!(this.controlRegister & 0x02)) {
                         throw new Error("Write enable not set (bit 0 of control register).");
                     }
 
