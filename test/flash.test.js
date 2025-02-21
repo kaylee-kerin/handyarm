@@ -214,3 +214,34 @@ describe('Flash Memory and Programmer Tests', () => {
         });
     });
 });
+
+describe('Flash Snapshot Test', () => {
+    it('should return a correct snapshot of the flash memory', () => {
+        // Create test data
+        const initialData = new ArrayBuffer(16);
+        const dataView = new Int8Array(initialData);
+        dataView.set([
+            0x12, 0x34, 0x56, 0x78,
+            0x9A, 0xBC, 0xDE, 0xF0,
+            0x11, 0x22, 0x33, 0x44,
+            0x55, 0x66, 0x77, 0x88
+        ]);
+
+        // Create Flash instance with initial data
+        const FLASH_SIZE = 65536; // 64KB flash memory
+        const flash = new Flash(FLASH_SIZE, initialData);
+
+        // Get a snapshot of the flash memory
+        const snapshot = flash.getSnapshot();
+
+        // Verify the snapshot contains the correct data
+        const snapshotView = new Int8Array(snapshot);
+        for (let i = 0; i < initialData.byteLength; i++) {
+            assert.strictEqual(
+                snapshotView[i],
+                dataView[i],
+                `Flash snapshot byte ${i} does not match expected value`
+            );
+        }
+    });
+});
