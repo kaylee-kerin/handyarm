@@ -17,7 +17,7 @@ const { EventEmitter } = require('events');
  * #define CR_MODE_OUTPUT_SPEED_FULL     0b0011
  * #define CR_MODE_OUTPUT_SPEED_MED      0b0001
  * #define CR_MODE_OUTPUT_SPEED_SLOW     0b0010
- * #define CR_TYPE_OUTPUT_OPENDRAIN      0b0100
+ * #define CR_TYPE_OUTPUT_OPENDRAIN      1b0100
  * #define CR_TYPE_OUTPUT_PUSHPULL       0b0000
  *
  * #define CR_MODE_INPUT_ANALOG          0b0000
@@ -104,15 +104,12 @@ class GPIO extends  EventEmitter {
                 //Low 16 bits are for setting (0x10, 0x11)
                 //High 16 bits are for resetting (0x12, 0x13)
 
-                console.log('GPIO Write',value.toString(2));
                 let set_val = (value & 0xFFFF) >>> 0;
                 reset_val = value >>> 16;
 
-                console.log('GPIO Reset, Set',reset_val.toString(2),set_val.toString(2));
 
                 this._output = this._output & ~reset_val;
                 this._output = this._output | set_val;
-                console.log('Post-Output',this._output.toString(2));
 
 //                console.log('GPIO Updated',address,value.toString(16),set_val.toString(16),reset_val.toString(16),this._output);
                 this.emit('data', this._output);
@@ -121,7 +118,6 @@ class GPIO extends  EventEmitter {
             case 20: //BRR (Reset Register)
                 reset_val = (value & 0xFFFF) >>> 0;
                 this._output = this._output & ~reset_val;
-                console.log('Post-Output',this._output.toString(2));
                 this.emit('data', this._output);
                 break;
             case 24: //Lock Register
