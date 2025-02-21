@@ -86,9 +86,22 @@ class Flash {
     /** Download a copy of the flash memory,
      * @returns ArrayBuffer with a copy of the flash memory.
      */
-    getSnapshot(){
-        //TODO: return a snapshot of the flash memory as an ArrayBuffer
+    getSnapshot() {
+        const snapshotBuffer = new ArrayBuffer(this.size); // Create an empty buffer with correct length
+        const snapshotView = new Uint8Array(snapshotBuffer);
+
+            // Copy the existing data into the new buffer
+        for (let i = 0; i < this.size ; i+=4) {
+            snapshotView[i] =   (this.buffer[i/4])        &0xFF;
+            snapshotView[i+1] = (this.buffer[i/4] >>>8)   &0xFF;
+            snapshotView[i+2] = (this.buffer[i/4] >>>16)  &0xFF;
+            snapshotView[i+3] = (this.buffer[i/4] >>>24)  &0xFF;
+
+        }
+
+        return snapshotBuffer;
     }
+
 
     /**
      * @method getProgrammer

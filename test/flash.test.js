@@ -233,7 +233,6 @@ describe('Flash Snapshot Test', () => {
 
         // Get a snapshot of the flash memory
         const snapshot = flash.getSnapshot();
-
         // Verify the snapshot contains the correct data
         const snapshotView = new Int8Array(snapshot);
         for (let i = 0; i < initialData.byteLength; i++) {
