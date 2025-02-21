@@ -83,21 +83,12 @@ class Flash {
         };
         
         // Store the snapshot in some persistent storage (currently just in memory for now)
-        // Create a new buffer snapshot
-        const bufferSnapshot = this.buffer.map(word => word >>> 0); // Convert words to bytes (big-endian)
-        
-        // Save as binary
-        const writer = new BinaryProtobufWriter();
-        writer.serializeBuffer(bufferSnapshot).then(data => {
-            fs.writeFileSync(filename, data);
-        }).catch(err => {
-            throw new Error(`Failed to save binary file: ${err.message}`);
-        });
+        this.states[stateName] = bufferSnapshot;
     
         return this;
     }
 
-    saveBinaryState(filename) {
+    restoreState(stateName) {
         const snapshot = this.states[stateName];
         if (!snapshot) {
             throw new Error(`State ${stateName} does not exist`);
