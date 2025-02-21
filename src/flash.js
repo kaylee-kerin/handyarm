@@ -83,6 +83,13 @@ class Flash {
         console.log(this.buffer);
     }
 
+    /** Download a copy of the flash memory,
+     * @returns ArrayBuffer with a copy of the flash memory.
+     */
+    getSnapshot(){
+        //TODO: return a snapshot of the flash memory as an ArrayBuffer
+    }
+
     /**
      * @method getProgrammer
      * @returns {Flash.Programmer} - A new Programmer instance associated with this Flash instance.
@@ -109,6 +116,8 @@ class Flash {
             this.currentOffset = 0; // Current offset into the flash memory
             this.PAGE_SIZE = 4096;  // Define the page size (4KB)
         }
+
+
 
         /**
          * @method read
