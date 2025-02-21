@@ -75,6 +75,41 @@ class Flash {
         throw new Error(`Attempted write to Flash at offset: 0x${offset.toString(16)}`);
     }
 
+    saveState(stateName) {
+        // Create a new buffer snapshot using JSON serialization (efficient and easy to store)
+        const bufferSnapshot = {
+            name: stateName,
+            data: this.buffer.map(word => word >>> 0).join(',') // Convert to base10 bytes
+        };
+        
+        // Store the snapshot in some persistent storage (currently just in memory for now)
+        this.states[stateName] = bufferSnapshot;
+    
+        return this;
+    }
+
+    restoreState(stateName) {
+        const snapshot = this.states[stateName];
+        if (!snapshot) {
+            throw new Error(`State ${stateName} does not exist`);
+        }
+
+        // Parse the base10 bytes into words and update the buffer
+        const data = snapshot.data.split(',').map(byte => parseInt(byte, 10));
+    
+        // Verify that the data length matches what was saved
+        if (data.length != this.size) {
+            throw new Error(`State ${stateName} has incorrect size`);
+        }
+
+        for (let i = 0; i < this.size; i++) {
+            const word = data[i];
+            this.buffer[i] = word;
+        }
+
+        return this;
+    }
+
     /**
      * @method dump
      * @description Dumps the contents of the flash memory to the console.  Useful for debugging.
