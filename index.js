@@ -7,5 +7,5 @@ module.exports = {
   IO:require('./src/io.js').IO,
   Block_Input:require('./src/block_input.js').Block_Input,
   Block_Output:require('./src/block_output.js').Block_Output,
-  GPIO:require('.src/GPIO.js').GPIO
+  GPIO:require('./src/GPIO.js').GPIO
 }
