@@ -6,5 +6,6 @@ module.exports = {
   DMA:require('./src/dma.js').DMA,
   IO:require('./src/io.js').IO,
   Block_Input:require('./src/block_input.js').Block_Input,
-  Block_Output:require('./src/block_output.js').Block_Output
+  Block_Output:require('./src/block_output.js').Block_Output,
+  GPIO:require('.src/GPIO.js').GPIO
 }
