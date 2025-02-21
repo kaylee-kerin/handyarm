@@ -56,12 +56,12 @@ class GPIO extends  EventEmitter {
         this._externalDrive[pin] = value;
 
         if(value < 0){
-            this._idr&= ~(1 << pin+16);
+            this._idr&= ~(1 << pin);
         }else if(value === 0){
             //floating, drive nothing (for now, should we do more?)
             //this._idr&= ~(1 << pin);
         }else{
-            this._idr|= (1 << pin+16);
+            this._idr|= (1 << pin);
         }
     }
 
@@ -86,6 +86,7 @@ class GPIO extends  EventEmitter {
     }
 
     write(address, value) {
+        let reset_val = 0;
         //When a write happens, it means some part of the GPIO config was updated.
         //Figure out which part, merge it with the external drive, and send the data event.
         switch(address) {
@@ -95,27 +96,33 @@ class GPIO extends  EventEmitter {
                 break;
             case 8: //input data register //Not usually writable...
                 break;
-            case 12: //output data register
+            case 12: //output data register, direct write
                 break;
             case 16: //BSRR (Set/Reset Register)
-            case 20: //BRR (Reset Register)
 
-                //Low 16 bits are for setting
-                //High 16 bits are for resetting
-                //This GPIO peripheral needs to keep state itself, since the results are incremental with the writes.
+//FIXME First: the output is inverted from what we need, and not correctly combining the different IO set/reset operations
+                //Low 16 bits are for setting (0x10, 0x11)
+                //High 16 bits are for resetting (0x12, 0x13)
+
+                console.log('GPIO Write',value.toString(2));
                 let set_val = (value & 0xFFFF) >>> 0;
-                let reset_val = value >>> 16;
+                reset_val = value >>> 16;
 
-                if(address == 16){ //BRR and BSRR are inverts of each other, but otherwise are the same.
-                    set_val = ~set_val >>> 0;
-                    reset_val = ~reset_val >>> 0;
-                }
-                this._output = this._output | set_val;
+                console.log('GPIO Reset, Set',reset_val.toString(2),set_val.toString(2));
+
                 this._output = this._output & ~reset_val;
+                this._output = this._output | set_val;
+                console.log('Post-Output',this._output.toString(2));
 
 //                console.log('GPIO Updated',address,value.toString(16),set_val.toString(16),reset_val.toString(16),this._output);
                 this.emit('data', this._output);
 
+                break;
+            case 20: //BRR (Reset Register)
+                reset_val = (value & 0xFFFF) >>> 0;
+                this._output = this._output & ~reset_val;
+                console.log('Post-Output',this._output.toString(2));
+                this.emit('data', this._output);
                 break;
             case 24: //Lock Register
                 break;
